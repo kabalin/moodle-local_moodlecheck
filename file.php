@@ -299,7 +299,20 @@ class local_moodlecheck_file {
                     } else {
                         $function->tagpair = false;
                     }
-                    $argumentspair = $this->find_tag_pair($tid, '(', ')', array('{', ';'));
+                    $argumentspair = $this->find_tag_pair($tid, '(', ')', array(':', '{', ';'));
+                    $function->typehint = false;
+                    if ($argumentspair !== false) {
+                        // Typehint.
+                        $typehintid = $this->next_nonspace_token($argumentspair[1], true, array(':'));
+                        if (in_array($this->tokens[$typehintid][0], array(T_STRING, T_ARRAY))) {
+                            $function->typehint = $this->tokens[$typehintid][1];
+                        } else if ($this->tokens[$typehintid][1] === '?') {
+                            $typehintid = $this->next_nonspace_token($typehintid, true);
+                            if ($this->tokens[$typehintid][0] == T_STRING) {
+                                $function->typehint = '?'.$this->tokens[$typehintid][1];
+                            }
+                        }
+                    }
                     if ($argumentspair !== false && $argumentspair[1] - $argumentspair[0] > 1) {
                         $function->argumentstokens = $this->break_tokens_by(
                             array_slice($tokens, $argumentspair[0] + 1, $argumentspair[1] - $argumentspair[0] - 1) );
@@ -325,6 +338,7 @@ class local_moodlecheck_file {
                         $function->arguments[] = array($type, $variable);
                     }
                     $function->boundaries = $this->find_object_boundaries($function);
+                    $function->hasreturn = $this->has_return_within($function->boundaries);
                     $this->functions[] = $function;
                 }
             }
@@ -401,6 +415,22 @@ class local_moodlecheck_file {
             }
         }
         return $this->constants;
+    }
+
+    /**
+     * Check if function has returns.
+     *
+     * @param array $boundaries Boundaries returned by {@see self::find_object_boundaries()}
+     * @return bool
+     */
+    public function has_return_within($boundaries) {
+        $this->get_tokens();
+        for ($tid = 0; $tid < $this->tokenscount; $tid++) {
+            if ($this->tokens[$tid][0] == T_RETURN && $boundaries[0] <= $tid && $boundaries[1] >= $tid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

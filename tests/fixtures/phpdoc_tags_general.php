@@ -223,11 +223,196 @@ class fixturing_general {
     }
 
     /**
+     * Invalid return annotation.
+     *
+     * @return int
+     * @return int
+     */
+    public function invalid_return_annotation() {
+        echo "yoy!";
+    }
+
+    /**
+     * Missing return annotation.
+     */
+    public function missing_return_annotation() {
+        return "yoy!";
+    }
+
+    /**
+     * Missing return.
+     *
+     * @return string
+     */
+    public function missing_return_statement() {
+        echo "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     *
+     * @return int
+     */
+    public function mismatch_return_type(): string {
+        return "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     *
+     * @return int|bool
+     */
+    public function mismatch_return_type1(): int {
+        return "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     *
+     * @return int|bool
+     */
+    public function mismatch_return_type2(): ?int {
+        return "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     *
+     * @return int
+     */
+    public function mismatch_return_type3(): ?int {
+        return "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     *
+     * @return string|int|null
+     */
+    public function mismatch_return_type4(): ?int {
+        return "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     *
+     * @return null
+     */
+    public function mismatch_return_type5(): ?int {
+        return "yoy!";
+    }
+
+    /**
+     * Mismatch return type and typehint.
+     * (this one is currently allowed)
+     *
+     * @return int
+     */
+    public function mismatch_return_type6(): \stdClass {
+        return new \stdClass();
+    }
+
+    /**
      * Correct return type.
      *
      * @return string
      */
-    public function correct_return_type(): string {
+    public function correct_return(): string {
         return "yay!";
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return void
+     */
+    public function correct_return1() {
+        echo "yay!";
+    }
+
+    /**
+     * Correct return type.
+     */
+    public function correct_return2() {
+        echo "yay!";
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return array|bool
+     */
+    public function correct_return3() {
+        return array("yay!");
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return string|null
+     */
+    public function correct_return4(): ?string {
+        return "yay!";
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return null|string
+     */
+    public function correct_return5(): ?string {
+        return "yay!";
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return void
+     */
+    public function correct_return6(): void {
+        echo "yay!";
+    }
+
+    /**
+     * Correct return type.
+     */
+    public function correct_return7(): void {
+        echo "yay!";
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return \stdClass
+     */
+    public function correct_return8(): \stdClass {
+        return new \stdClass();
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return \stdClass|null
+     */
+    public function correct_return9(): ?\stdClass {
+        return new \stdClass();
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return int[]
+     */
+    public function correct_return10(): array {
+        return array(1, 2);
+    }
+
+    /**
+     * Correct return type.
+     *
+     * @return array
+     */
+    public function correct_return11(): array {
+        return array(1, 2);
     }
 }

@@ -36,6 +36,7 @@ local_moodlecheck_registry::add_rule('noinlinephpdocs')->set_callback('local_moo
 local_moodlecheck_registry::add_rule('phpdocsfistline')->set_callback('local_moodlecheck_phpdocsfistline');
 local_moodlecheck_registry::add_rule('functiondescription')->set_callback('local_moodlecheck_functiondescription');
 local_moodlecheck_registry::add_rule('functionarguments')->set_callback('local_moodlecheck_functionarguments');
+local_moodlecheck_registry::add_rule('functionreturns')->set_callback('local_moodlecheck_functionreturns');
 local_moodlecheck_registry::add_rule('variableshasvar')->set_callback('local_moodlecheck_variableshasvar');
 local_moodlecheck_registry::add_rule('definedoccorrect')->set_callback('local_moodlecheck_definedoccorrect');
 local_moodlecheck_registry::add_rule('filehascopyright')->set_callback('local_moodlecheck_filehascopyright');
@@ -445,15 +446,78 @@ function local_moodlecheck_functionarguments(local_moodlecheck_file $file) {
                     }
                 }
             }
+            if (!$match) {
+                $errors[] = array(
+                    'line' => $function->phpdocs->get_line_number($file, '@param'),
+                    'function' => $function->fullname);
+            }
+        }
+    }
+    return $errors;
+}
+
+/**
+ * Checks that all functions have returns matching phpdoc.
+ * Namespaced types are ignored at the moment.
+ *
+ * @param local_moodlecheck_file $file
+ * @return array of found errors
+ */
+function local_moodlecheck_functionreturns(local_moodlecheck_file $file) {
+    $errors = array();
+    foreach ($file->get_functions() as $function) {
+        if ($function->phpdocs !== false) {
+            $match = true;
             $documentedreturns = $function->phpdocs->get_params('return');
-            for ($i = 0; $match && $i < count($documentedreturns); $i++) {
-                if (empty($documentedreturns[$i][0]) || $documentedreturns[$i][0] == 'type') {
+            if (count($documentedreturns) > 1) {
+                // More than one return annotations.
+                $match = false;
+            }
+            if ($function->hasreturn && empty($documentedreturns)) {
+                // Function has a return statement, but annotation is missing.
+                $match = false;
+            }
+            if ($function->typehint && $function->typehint !== 'void' && empty($documentedreturns)) {
+                // Function has a return typehint, but annotation is missing.
+                $match = false;
+            }
+            if (!empty($documentedreturns)) {
+                if (empty($documentedreturns[0][0]) || $documentedreturns[0][0] === 'type') {
+                    // Type is missing or IDE default one.
                     $match = false;
+                }
+                if (!$function->hasreturn && $documentedreturns[0][0] !== 'void') {
+                    // Function has no return statement, but annotation is present and not void.
+                    $match = false;
+                }
+                if ($function->typehint) {
+                    var_dump($function->typehint);
+                    // When typehint is present we expect only type annotation or type|null.
+                    if (strpos($function->typehint, '?') === 0) {
+                        // Typehint suggest it can be null.
+                        $type = substr($function->typehint, 1);
+                        $returntypes = explode('|', $documentedreturns[0][0]);
+                        // Both hinted type and null needs to be in array and nothing else. Can't use array_diff here,
+                        // it is funny about null string.
+                        if (!(count($returntypes) === 2 && in_array('null', $returntypes, true)
+                                && in_array($type, $returntypes, true))) {
+                            // Annotation is not correct, wrong type or missing null.
+                            $match = false;
+                        }
+                    } else if ($function->typehint === 'array') {
+                        if (!($documentedreturns[0][0] === 'array' || substr($documentedreturns[0][0], -2) === '[]')) {
+                            // Array typehint does not match annotation.
+                            $match = false;
+                        }
+                    } else if ($function->typehint !== $documentedreturns[0][0]) {
+                        // Function return typehint does not match annotation.
+                        $match = false;
+                    }
                 }
             }
             if (!$match) {
                 $errors[] = array(
-                    'line' => $function->phpdocs->get_line_number($file, '@param'),
+                    'line' => $function->phpdocs->get_line_number($file, '@return'),
                     'function' => $function->fullname);
             }
         }

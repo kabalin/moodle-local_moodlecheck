@@ -142,6 +142,7 @@ class local_moodlecheck_rules_testcase extends advanced_testcase {
         $xmlresult = new DOMDocument();
         $xmlresult->loadXML($result);
 
+        var_dump($result);
         // Let's verify we have received a xml with file top element and 8 children.
         $xpath = new DOMXpath($xmlresult);
         $found = $xpath->query("//file/error");

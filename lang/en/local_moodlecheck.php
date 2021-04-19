@@ -82,6 +82,9 @@ $string['rule_functiondescription'] = 'Functions have descriptions in phpdocs';
 $string['error_functionarguments'] = 'Phpdocs for function <b>{$a->function}</b> has incomplete parameters list';
 $string['rule_functionarguments'] = 'Phpdocs for functions properly define all parameters';
 
+$string['error_functionreturns'] = 'Phpdocs for function <b>{$a->function}</b> does not contain @return or incorrect';
+$string['rule_functionreturns'] = 'Phpdocs for functions properly define returns';
+
 $string['error_variableshasvar'] = 'Phpdocs for variable <b>{$a->variable}</b> does not contain @var or incorrect';
 $string['rule_variableshasvar'] = 'Phpdocs for variables contain @var with variable type and name';
 
